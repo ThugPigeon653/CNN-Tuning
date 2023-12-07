@@ -7,11 +7,11 @@ import config_loader
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 class CNNModel(tf.keras.Model):
-  def __init__(self):
+  def __init__(self, dense_size:int):
     super().__init__()
     self.conv1 = Conv2D(32, 3, activation='relu')
     self.flatten = Flatten()
-    self.d1 = Dense(128, activation='relu')
+    self.d1 = Dense(dense_size, activation='relu')
     self.d2 = Dense(10)
 
   def call(self, x):
@@ -24,9 +24,9 @@ class Trainer():
   __model:CNNModel
   __model_name:str
 
-  def __init__(self, model:CNNModel, model_name:str):
+  def __init__(self, model:CNNModel, model_info:{}):
     self.__model=model
-    self.__model_name=model_name
+    self.__model_name=model_info.get('name')
     
   @property
   def model(self):
@@ -46,7 +46,6 @@ class Trainer():
 
     test_ds = tf.data.Dataset.from_tensor_slices((x_test, y_test)).batch(32)
 
-    model = CNNModel()
     loss_object = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 
     optimizer = tf.keras.optimizers.Adam()
@@ -58,26 +57,22 @@ class Trainer():
     @tf.function
     def train_step(images, labels):
       with tf.GradientTape() as tape:
-        # training=True is only needed if there are layers with different
-        # behavior during training versus inference (e.g. Dropout).
-        predictions = model(images, training=True)
+        predictions = self.__model(images, training=True)
         loss = loss_object(labels, predictions)
-      gradients = tape.gradient(loss, model.trainable_variables)
-      optimizer.apply_gradients(zip(gradients, model.trainable_variables))
+      gradients = tape.gradient(loss, self.__model.trainable_variables)
+      optimizer.apply_gradients(zip(gradients, self.__model.trainable_variables))
 
       train_loss(loss)
       train_accuracy(labels, predictions)
     @tf.function
     def test_step(images, labels):
-      # training=False is only needed if there are layers with different
-      # behavior during training versus inference (e.g. Dropout).
-      predictions = model(images, training=False)
+      predictions = self.__model(images, training=False)
       t_loss = loss_object(labels, predictions)
 
       test_loss(t_loss)
       test_accuracy(labels, predictions)
 
-    EPOCHS = 5
+    EPOCHS = model_config.get('epochs')
 
     for epoch in range(EPOCHS):
       # Reset the metrics at the start of the next epoch
@@ -100,7 +95,8 @@ class Trainer():
         f'Test Accuracy: {test_accuracy.result() * 100}'
       )
 
-    model.save(self.__model_name)
+    self.__model.save(self.__model_name)
 
 # implementation
-Trainer(CNNModel(), config_loader.Loader().get_config().get('model', {}).get('name')).train()
+model_config=config_loader.Loader().get_config().get('CNN-NumReader', {})
+Trainer(CNNModel(model_config.get('dense_size')), model_config).train()
