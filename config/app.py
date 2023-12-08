@@ -13,7 +13,7 @@ def get_yaml():
         response = Response(yaml_content, content_type="text/yaml")
         return response
     except FileNotFoundError:
-        return "YAML file not found", 404
+        return "Config file not found", 404
     except Exception as e:
         return str(e), 500
 

@@ -1,0 +1,4 @@
+CNN-NumReader:
+  name: "CNN-NumReader"
+  dense_size: 128
+  epochs: 6

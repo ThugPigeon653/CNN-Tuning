@@ -9,7 +9,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 class CNNModel(tf.keras.Model):
   def __init__(self, dense_size:int):
     super().__init__()
-    self.conv1 = Conv2D(32, 3, activation='relu')
+    self.conv1 = Conv2D(32, 4, activation='relu')
     self.flatten = Flatten()
     self.d1 = Dense(dense_size, activation='relu')
     self.d2 = Dense(10)

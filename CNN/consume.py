@@ -9,9 +9,8 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 class Predictions():
     @staticmethod
-    def predict(model_name:str)->int:
+    def predict(model_name:str, img_path:str="image.jpg")->int:
         model = load_model(config_loader.Loader().get_config().get(model_name, {}).get('name'))
-        img_path = "image.jpg"
         img = Image.open(img_path).convert("L") 
         img = img.resize((28, 28))
         img_array = np.array(img)
@@ -23,4 +22,12 @@ class Predictions():
 
         return predicted_class
 
-print(Predictions().predict('CNN-NumReader'))
+    def predict_range(self, model_name:str, start:int, end:int)->list[int]:
+        predictions:list[int]=[]
+        for i in range(start, end+1):
+            predictions.append(self.predict(model_name, f"{i}.jpg"))
+        return predictions
+
+
+
+print(Predictions().predict_range('CNN-NumReader', 1,9))
