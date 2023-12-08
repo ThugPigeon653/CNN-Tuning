@@ -2,6 +2,7 @@ import tensorflow as tf
 from tensorflow.keras.layers import Dense, Flatten, Conv2D
 from tensorflow.keras import Model
 import os
+import requests
 import config_loader
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -9,7 +10,7 @@ os.chdir(os.path.dirname(os.path.abspath(__file__)))
 class CNNModel(tf.keras.Model):
   def __init__(self, dense_size:int):
     super().__init__()
-    self.conv1 = Conv2D(48, 3, activation='relu')
+    self.conv1 = Conv2D(32, 3, activation='relu')
     self.flatten = Flatten()
     self.d1 = Dense(dense_size, activation='relu')
     self.d2 = Dense(10)
@@ -33,7 +34,7 @@ class Trainer():
     return self.__model
 
   def train(self):
-    mnist = tf.keras.datasets.mnist
+    mnist = requests.get(f"{os.environ.get('DATA_ENDPOINT')}:{os.environ.get('TRAIN_DATA_PORT')}")
 
     (x_train, y_train), (x_test, y_test) = mnist.load_data()
     x_train, x_test = x_train / 255.0, x_test / 255.0
