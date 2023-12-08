@@ -3,8 +3,6 @@ services:
     build: .
     ports: 
      - "5001:5000"
-    environment:
-     - "DATA_ENDPOINT"
   training-data:
     build: .
     ports:
@@ -13,3 +11,8 @@ services:
     build: .
     ports:
      - "5003:5000"
+    environment:
+     - CONFIG_DATA_ENDPOINT=${CONFIG_DATA_ENDPOINT}
+     - TRAIN_DATA_ENDPOINT=${TRAIN_DATA_ENDPOINT}
+     - CONFIG_DATA_PORT=${CONFIG_DATA_PORT}
+     - TRAIN_DATA_PORT=${TRAIN_DATA_PORT}
