@@ -1,0 +1,2 @@
+Flask==3.0.0
+Tensorflow==2.15.0
