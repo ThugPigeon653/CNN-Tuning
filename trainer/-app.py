@@ -106,5 +106,12 @@ class Trainer():
     self.__model.save(self.__model_name)
 
 # implementation
-model_config=requests.get(f"{os.environ.get('DATA_ENDPOINT')}:{os.environ.get('CONFIG_DATA_PORT')}")
-Trainer(CNNModel(model_config.get('dense_size')), model_config).train()
+try:
+    response = requests.get(f"{os.environ.get('CONFIG_DATA_ENDPOINT')}:{os.environ.get('CONFIG_DATA_PORT')}")
+    response.raise_for_status() 
+    data = response.json()
+    print("Request successful. Data received:", data)
+    Trainer(CNNModel(data.get('dense_size')), data).train()
+
+except requests.exceptions.RequestException as e:
+  print(e)
