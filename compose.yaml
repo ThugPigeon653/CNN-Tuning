@@ -16,3 +16,6 @@ services:
      - TRAIN_DATA_ENDPOINT=${TRAIN_DATA_ENDPOINT}
      - CONFIG_DATA_PORT=${CONFIG_DATA_PORT}
      - TRAIN_DATA_PORT=${TRAIN_DATA_PORT}
+    depends_on:
+      - config
+      - training-data
