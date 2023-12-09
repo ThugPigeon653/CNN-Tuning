@@ -3,6 +3,7 @@ from tensorflow.keras.layers import Dense, Flatten, Conv2D
 from tensorflow.keras import Model
 import os
 import requests
+import numpy as np
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -42,9 +43,9 @@ class Trainer():
       print(f"Failed to get mnist data at: {self.__train_data_endpoint}\n{e}")
     if response.status_code == 200:
         data = response.json()
-        print(f"\n\n\n{data}\n\n\n")
-        x_train, y_train = data['x_train'], data['y_train']
-        x_test, y_test = data['x_test'], data['y_test']
+        print(f"\n\n\nkeys: {data.keys()}\n\n\n\n")
+        x_train, y_train = np.array(data['x_train']), np.array(data['y_train'])
+        x_test, y_test = np.array(data['x_test']), np.array(data['y_test'])
     else:
       raise Exception(f"Could not load training data\n{response.json()}")
     x_train, x_test = x_train / 255.0, x_test / 255.0
