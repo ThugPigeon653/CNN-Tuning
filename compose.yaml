@@ -1,14 +1,14 @@
 services:
   config:
-    build: .
+    build: ./config
     ports: 
      - "5001:5000"
   training-data:
-    build: .
+    build: ./training-data
     ports:
       - "5002:5000"
   trainer:
-    build: .
+    build: ./trainer
     ports:
      - "5003:5000"
     environment:
