@@ -2,3 +2,4 @@ Flask==3.0.0
 Tensorflow==2.15.0
 requests==2.31.0
 numpy==1.26.2
+boto3==1.33.11

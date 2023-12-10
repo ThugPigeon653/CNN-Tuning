@@ -4,6 +4,8 @@ from tensorflow.keras import Model
 import os
 import requests
 import numpy as np
+import boto3
+import sys
 
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
@@ -25,8 +27,10 @@ class Trainer():
   __train_data_endpoint:str
   __model:CNNModel
   __model_name:str
+  __bucket:str
 
-  def __init__(self, model:CNNModel):
+  def __init__(self, model:CNNModel, bucket:str):
+    self.__bucket=bucket
     self.__train_data_endpoint=os.environ.get('TRAIN_DATA_ENDPOINT')+':'+os.environ.get('TRAIN_DATA_PORT')
     print(f"ENDPOINT: {self.__train_data_endpoint}")
     self.__model=model
@@ -106,8 +110,17 @@ class Trainer():
         f'Test Loss: {test_loss.result()}, '
         f'Test Accuracy: {test_accuracy.result() * 100}'
       )
-
-    self.__model.save(self.__model_name)
+      with boto3.client('s3') as s3_client:
+        response=s3_client.get_object(self.__bucket, training_score_path)
+        scores:[]=response['body'].split(',')
+        if scores[0].split(':')[1] >= test_accuracy.result() and scores[0].split(':')[0]<=test_loss.result():
+          with open(training_score_path, "w") as file:
+            file.write(f"L:{test_accuracy.result()},A:{train_accuracy.result()}")
+          self.__model.save(self.__model_name)
+          training_score_path:str='training_score.txt'
+          with boto3.client('s3') as s3_client:
+            s3_client.upload_file(self.__model_name, self.__bucket, self.__model_name)
+            s3_client.upload_file(training_score_path, self.__bucket, self.__model_name)
 
 # implementation
 try:
@@ -115,12 +128,18 @@ try:
     #response.raise_for_status() 
     data = response.json()['CNN-NumReader']
     print("Request successful. Data received:", data)
-    
-
 except requests.exceptions.RequestException as e:
       print('\n\n\n\n')
       print('==================')
       print(f"content: {response.content}\ntext: {response.text}")
       print('\n\n\n\n')
 
-Trainer(CNNModel(data['dense_size'])).train()
+bucket='tensorflow_tuning_cnn'
+with boto3.client('s3') as s3_client:
+  try:
+    response=s3_client.get_object('tensorflow_tuning_cnn', 'CNN-NumReader')
+    model=response['body'].read()
+  except:
+    model=CNNModel(data['dense_size'])
+Trainer(model, bucket).train()
+sys.exit(0)
