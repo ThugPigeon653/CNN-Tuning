@@ -1,0 +1,10 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  MyS3Bucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: 'tensorflow_tuning_cnn'
+  MyS3PhotoBucket:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: 'tensorflow_tuning_cnn_data'
